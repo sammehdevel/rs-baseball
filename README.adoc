@@ -1,0 +1,43 @@
+== RS-Baseball
+
+'''
+
+A simple async baseball game built in rust.
+
+=== MVP
+
+'''
+
+The most basic version of baseball is when there is a pitcher and a batter, and the batter never swings at the balls.
+This will allow the game to be setup, the messaging system, and some basic game interactions developed.
+
+=== Terminology
+
+==== Game
+
+The state of the game, which includes the inning, the score, the batter count, and how many runners are on base.
+
+==== Player
+
+The `Player` is a single unit that contains stats that decides what happens when the ball is in their possession.
+
+===== Pitcher
+
+The `Pitcher` is a specific player that pitches the ball to the batter, they are the start of each game loop.
+
+===== Batter
+
+The `Batter` is a specific player that receives the ball and decides what to do with it.
+
+==== Fielders
+
+The `Fielders` are a collection of players that act upon the `Batters` outcome from the pitch.
+
+=== Game loop
+
+Half inning starts ->
+
+Pitcher pitch -> Batter result -> Fielding result -> Repeat until 3 outs
+
+Half inning end -> Until 9 complete innings are played
+
