@@ -2,6 +2,7 @@ use crate::game::game_message::{GameMessage, GameMessageType};
 use crate::game::team::Team;
 use tokio::sync::broadcast;
 use tokio::sync::broadcast::{Receiver, Sender};
+use crate::position::Position::Pitcher;
 
 mod game_message;
 pub mod team;
@@ -56,13 +57,22 @@ impl Game {
                     }
                 }
                 GameMessageType::Walk => {
+                    if !self.runner_on_first {
+                        self.runner_on_first = true;
+                    } else if !self.runner_on_second {
+                        self.runner_on_second = true;
+                    } else if !self.runner_on_third {
+                        self.runner_on_third = true;
+                    } else {
+                        println!("Run Scored!!");
+                    }
                     self.send_next_pitch();
                 }
                 _ => {}
             }
         }
     }
-    
+
     fn reset_count(&mut self) {
         self.strikes = 0;
         self.balls = 0
@@ -91,7 +101,7 @@ impl Game {
     }
 }
 
-pub async fn init_game(mut home_team: Team, mut away_team: Team) -> Game {
+pub async fn init_game(home_team: Team, away_team: Team) -> Game {
     let (tx, rx) = broadcast::channel(10);
     Game {
         half_inning: 0,
