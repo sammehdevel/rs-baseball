@@ -1,8 +1,8 @@
-use crate::game::game_message::GameMessage;
+use crate::game::game_message::{GameMessage, GameMessageType};
 use crate::game::team::player::Player;
 use crate::position::Position;
-use std::any::Any;
-use tokio::sync::mpsc::{Receiver, Sender};
+use rand::{rng, Rng};
+use tokio::sync::broadcast::{Receiver, Sender};
 
 pub mod player;
 
@@ -11,11 +11,41 @@ pub struct Team {
 }
 
 impl Team {
-    pub async fn init(&self, game_channel: (&Sender<GameMessage>, &mut Receiver<GameMessage>)) {
-        let (_, mut rx) = game_channel;
-        while let Some(message) = rx.recv().await {
-            println!("Team received message {:?}", message.message_type)
-        }
+    pub async fn init(&mut self) {}
+    pub fn start_pitching(
+        &mut self,
+        mut game_channel: (Sender<GameMessage>, Receiver<GameMessage>),
+    ) {
+        tokio::spawn(async move {
+            loop {
+                let message = game_channel.1.recv().await;
+                if message.is_err() {
+                    println!("err::{}", message.err().unwrap())
+                } else {
+                    match message.unwrap().message_type {
+                        GameMessageType::NewPitch => {
+                            if rng().random::<f64>() < 0.2 {
+                                game_channel
+                                    .0
+                                    .send(GameMessage {
+                                        message_type: GameMessageType::Strike,
+                                    })
+                                    .expect("Could not send message from team");
+                            } else {
+                                game_channel
+                                    .0
+                                    .send(GameMessage {
+                                        message_type: GameMessageType::Ball,
+                                    })
+                                    .expect("Could not send message from team");
+                            }
+                        }
+
+                        _ => {}
+                    }
+                }
+            }
+        });
     }
 }
 

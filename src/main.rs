@@ -16,5 +16,4 @@ async fn main() {
     while let Some(message) = rx.recv().await {
         println!("GOT = {}", message);
     }
-
 }
